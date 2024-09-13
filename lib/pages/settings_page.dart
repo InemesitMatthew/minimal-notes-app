@@ -16,6 +16,7 @@ class SettingsPage extends StatelessWidget {
         foregroundColor: Theme.of(context).colorScheme.inversePrimary,
       ),
       body: Container(
+        // Card-like styling for the settings option.
         decoration: BoxDecoration(
           color: Theme.of(context).colorScheme.primary,
           borderRadius: BorderRadius.circular(10),
@@ -32,7 +33,7 @@ class SettingsPage extends StatelessWidget {
         child: Row(
           mainAxisAlignment: MainAxisAlignment.spaceBetween,
           children: [
-            // dark mode
+            // Dark Mode label.
             Text(
               "Dark Mode",
               style: TextStyle(
@@ -41,12 +42,11 @@ class SettingsPage extends StatelessWidget {
               ),
             ),
 
-            // switch toggle
+            // Toggle switch for Dark Mode.
             CupertinoSwitch(
-              value: Provider.of<ThemeProvider>(context).isDarkMode,
+              value: Provider.of<ThemeProvider>(context).isDarkMode, // Current theme status.
               onChanged: (value) =>
-                  Provider.of<ThemeProvider>(context, listen: false)
-                      .toggleTheme(),
+                  Provider.of<ThemeProvider>(context, listen: false).toggleTheme(), // Toggle theme.
             ),
           ],
         ),

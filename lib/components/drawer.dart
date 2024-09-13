@@ -8,10 +8,11 @@ class MyDrawer extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return Drawer(
+      // Set the background color for the drawer
       backgroundColor: Theme.of(context).colorScheme.surface,
       child: Column(
         children: [
-          // header
+          // Drawer header (icon with customized theme)
           Theme(
             data: Theme.of(context).copyWith(
               dividerTheme: const DividerThemeData(color: Colors.transparent),
@@ -21,22 +22,21 @@ class MyDrawer extends StatelessWidget {
             ),
           ),
 
-          const SizedBox(
-            height: 25,
-          ),
+          const SizedBox(height: 25),
 
-          // note tile
+          // "Notes" tile to navigate to home page
           DrawerTile(
             title: "Notes",
             leading: const Icon(Icons.home_rounded),
-            onTap: () => Navigator.pop(context),
+            onTap: () => Navigator.pop(context),  // Close drawer on tap
           ),
 
-          // settings tile
+          // "Settings" tile to navigate to settings page
           DrawerTile(
             title: "Settings",
             leading: const Icon(Icons.settings),
             onTap: () {
+              // Close drawer and navigate to SettingsPage
               Navigator.pop(context);
               Navigator.push(
                 context,

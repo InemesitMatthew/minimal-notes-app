@@ -1,11 +1,11 @@
 import 'package:isar/isar.dart';
 
-// this line is needed to generate file
-// then run: dart run build_runner build
+// This line is required for generating the Isar database code.
+// Run: dart run build_runner build
 part 'note.g.dart';
 
 @Collection()
 class Note {
-  Id id = Isar.autoIncrement; // Automatically generates unique IDs
-  late String text; // A text field for the note
+  Id id = Isar.autoIncrement; // Auto-generate unique IDs for each note.
+  late String text; // The text content of the note.
 }

@@ -14,38 +14,32 @@ class NotesPage extends StatefulWidget {
 }
 
 class _NotesPageState extends State<NotesPage> {
-  // text controller to access what the user typed
+  // Text controller to handle input from the user when creating/updating notes.
   final textController = TextEditingController();
 
   @override
   void initState() {
     super.initState();
-
-    // on app startup, fetch existing notes
+    // Fetch existing notes from the database when the app starts.
     readNotes();
   }
 
-  // create a note
+  // Function to show a dialog and create a new note.
   void createNote() {
     showDialog(
       context: context,
       builder: (context) => AlertDialog(
         backgroundColor: Theme.of(context).colorScheme.surface,
         content: TextField(
-          controller: textController,
+          controller: textController, // User input for the note text.
         ),
         actions: [
-          // create button
+          // Button to create the note.
           MaterialButton(
             onPressed: () {
-              // add to db
-              context.read<NoteDb>().addNote(textController.text);
-
-              // clear controller
-              textController.clear();
-
-              // pop dialog box
-              Navigator.pop(context);
+              context.read<NoteDb>().addNote(textController.text); // Add to DB.
+              textController.clear(); // Clear the input field.
+              Navigator.pop(context); // Close the dialog.
             },
             child: const Text("Create"),
           ),
@@ -54,31 +48,27 @@ class _NotesPageState extends State<NotesPage> {
     );
   }
 
-  // read notes
+  // Fetch notes from the database.
   void readNotes() {
     context.read<NoteDb>().fetchNotes();
   }
 
-  // update a note
+  // Function to show a dialog and update an existing note.
   void updateNote(Note note) {
-    // pre-fill the current note text
-    textController.text = note.text;
+    textController.text = note.text; // Pre-fill the current text.
     showDialog(
       context: context,
       builder: (context) => AlertDialog(
         backgroundColor: Theme.of(context).colorScheme.surface,
         title: const Text("Update Note"),
-        content: TextField(controller: textController),
+        content: TextField(controller: textController), // User input.
         actions: [
-          // update button
+          // Button to update the note.
           MaterialButton(
             onPressed: () {
-              // update note in db
-              context.read<NoteDb>().updateNote(note.id, textController.text);
-              // clear the controller
-              textController.clear();
-              // pop dialog box
-              Navigator.pop(context);
+              context.read<NoteDb>().updateNote(note.id, textController.text); // Update note in DB.
+              textController.clear(); // Clear the input field.
+              Navigator.pop(context); // Close the dialog.
             },
             child: const Text("Update"),
           ),
@@ -87,18 +77,15 @@ class _NotesPageState extends State<NotesPage> {
     );
   }
 
-  // delete a note
+  // Function to delete a note by ID.
   void deleteNote(int id) {
-    context.read<NoteDb>().deleteNote(id);
+    context.read<NoteDb>().deleteNote(id); // Delete note from DB.
   }
 
   @override
   Widget build(BuildContext context) {
-    // note db
-    final noteDb = context.watch<NoteDb>();
-
-    // current notes
-    List<Note> currentNotes = noteDb.currentNotes;
+    final noteDb = context.watch<NoteDb>(); // Watch for updates from NoteDb.
+    List<Note> currentNotes = noteDb.currentNotes; // List of current notes.
 
     return Scaffold(
       appBar: AppBar(
@@ -108,21 +95,20 @@ class _NotesPageState extends State<NotesPage> {
       ),
       backgroundColor: Theme.of(context).colorScheme.surface,
       floatingActionButton: FloatingActionButton(
-        onPressed: createNote,
+        onPressed: createNote, // Open the dialog to create a new note.
         backgroundColor: Theme.of(context).colorScheme.primary,
         child: Icon(
           Icons.add,
           color: Theme.of(context).colorScheme.inversePrimary,
         ),
       ),
-      drawer: const MyDrawer(),
+      drawer: const MyDrawer(), // The app's navigation drawer.
       body: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
-          // HEADING
+          // Page heading.
           Padding(
             padding: const EdgeInsets.only(left: 25.0),
-            // adding google fonts
             child: Text(
               'Notes',
               style: GoogleFonts.dmSerifText(
@@ -132,19 +118,16 @@ class _NotesPageState extends State<NotesPage> {
             ),
           ),
 
-          // LIST OF NOTES
+          // Display a list of notes.
           Expanded(
             child: ListView.builder(
-              itemCount: currentNotes.length,
+              itemCount: currentNotes.length, // Number of notes.
               itemBuilder: (context, index) {
-                // get individual note
-                final note = currentNotes[index];
-
-                // list tile UI
+                final note = currentNotes[index]; // Get individual note.
                 return NoteTile(
                   text: note.text,
-                  onEditPressed: () => updateNote(note),
-                  onDeletePressed: () => deleteNote(note.id),
+                  onEditPressed: () => updateNote(note), // Edit note.
+                  onDeletePressed: () => deleteNote(note.id), // Delete note.
                 );
               },
             ),

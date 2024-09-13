@@ -4,55 +4,52 @@ import '/models/note.dart';
 import 'package:path_provider/path_provider.dart';
 
 class NoteDb extends ChangeNotifier {
-  static late Isar isar; // This is a reference to the Isar instance.
+  static late Isar isar; // Reference to the Isar instance for database operations.
 
-  // I N I T I A L I Z E - D A T A B A S E
+  // Initialize the Isar database and set up the schema for Note objects.
   static Future<void> initialize() async {
-    final dir = await getApplicationDocumentsDirectory();
+    final dir = await getApplicationDocumentsDirectory(); // Get app directory path.
     isar = await Isar.open(
       [
-        NoteSchema
-      ], // Opens the Isar database with the schema for the Note class.
-      directory: dir.path, // Directory to store the database files.
+        NoteSchema, // Define the schema for the Note model.
+      ],
+      directory: dir.path, // Set directory for the database.
     );
   }
 
-  // list of notes
+  // List to hold current notes fetched from the database.
   final List<Note> currentNotes = [];
 
-  // C R E A T E - a note and save to db
+  // Create and add a new note to the database.
   Future<void> addNote(String textFromUser) async {
-    // create a new note object
-    final newNote = Note()..text = textFromUser;
+    final newNote = Note()..text = textFromUser; // Create a new Note object.
 
-    // save to db
-    await isar.writeTxn(() => isar.notes.put(newNote));
+    await isar.writeTxn(() => isar.notes.put(newNote)); // Save note to the database.
 
-    // re-read from db
-    fetchNotes();
+    fetchNotes(); // Refresh the list of notes after adding.
   }
 
-  // R E A D - notes from db
+  // Fetch all notes from the database.
   Future<void> fetchNotes() async {
-    List<Note> fetchedNotes = await isar.notes.where().findAll();
-    currentNotes.clear();
-    currentNotes.addAll(fetchedNotes);
-    notifyListeners();
+    List<Note> fetchedNotes = await isar.notes.where().findAll(); // Fetch all notes.
+    currentNotes.clear(); // Clear the current list of notes.
+    currentNotes.addAll(fetchedNotes); // Update the list with fetched notes.
+    notifyListeners(); // Notify listeners that the data has changed.
   }
 
-  // U P D A T E - a note in db
+  // Update an existing note by ID.
   Future<void> updateNote(int id, String newText) async {
-    final existingNote = await isar.notes.get(id);
+    final existingNote = await isar.notes.get(id); // Fetch the note by ID.
     if (existingNote != null) {
-      existingNote.text = newText;
-      await isar.writeTxn(() => isar.notes.put(existingNote));
-      await fetchNotes();
+      existingNote.text = newText; // Update the note text.
+      await isar.writeTxn(() => isar.notes.put(existingNote)); // Save updated note.
+      await fetchNotes(); // Refresh notes.
     }
   }
 
-  // D E L E T E - a note from the db
+  // Delete a note from the database by ID.
   Future<void> deleteNote(int id) async {
-    await isar.writeTxn(() => isar.notes.delete(id));
-    await fetchNotes();
+    await isar.writeTxn(() => isar.notes.delete(id)); // Remove the note by ID.
+    await fetchNotes(); // Refresh notes.
   }
 }
