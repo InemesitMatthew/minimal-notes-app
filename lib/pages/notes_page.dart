@@ -14,32 +14,55 @@ class NotesPage extends StatefulWidget {
 }
 
 class _NotesPageState extends State<NotesPage> {
-  // Text controller to handle input from the user when creating/updating notes.
+  // Text controller to access what the user typed
   final textController = TextEditingController();
 
   @override
   void initState() {
     super.initState();
-    // Fetch existing notes from the database when the app starts.
+    // On app startup, fetch existing notes
     readNotes();
   }
 
-  // Function to show a dialog and create a new note.
+  // Dispose controller to avoid memory leaks
+  @override
+  void dispose() {
+    textController.dispose();
+    super.dispose();
+  }
+
+  // Create a note
   void createNote() {
     showDialog(
       context: context,
       builder: (context) => AlertDialog(
         backgroundColor: Theme.of(context).colorScheme.surface,
         content: TextField(
-          controller: textController, // User input for the note text.
+          controller: textController,
+          decoration: const InputDecoration(hintText: 'Enter note text'),
         ),
         actions: [
-          // Button to create the note.
+          // Create button
           MaterialButton(
             onPressed: () {
-              context.read<NoteDb>().addNote(textController.text); // Add to DB.
-              textController.clear(); // Clear the input field.
-              Navigator.pop(context); // Close the dialog.
+              if (textController.text.trim().isEmpty) {
+                // Prevent empty notes and show an error message
+                ScaffoldMessenger.of(context).showSnackBar(
+                  const SnackBar(content: Text('Note cannot be empty')),
+                );
+                return;
+              }
+              // Add to db
+              context.read<NoteDb>().addNote(textController.text);
+              // Clear controller
+              textController.clear();
+              // Pop dialog box
+              Navigator.pop(context);
+
+              // Show success message
+              ScaffoldMessenger.of(context).showSnackBar(
+                const SnackBar(content: Text('Note created successfully')),
+              );
             },
             child: const Text("Create"),
           ),
@@ -48,27 +71,43 @@ class _NotesPageState extends State<NotesPage> {
     );
   }
 
-  // Fetch notes from the database.
+  // Read notes
   void readNotes() {
     context.read<NoteDb>().fetchNotes();
   }
 
-  // Function to show a dialog and update an existing note.
+  // Update a note
   void updateNote(Note note) {
-    textController.text = note.text; // Pre-fill the current text.
+    // Pre-fill the current note text
+    textController.text = note.text;
     showDialog(
       context: context,
       builder: (context) => AlertDialog(
         backgroundColor: Theme.of(context).colorScheme.surface,
         title: const Text("Update Note"),
-        content: TextField(controller: textController), // User input.
+        content: TextField(controller: textController),
         actions: [
-          // Button to update the note.
+          // Update button
           MaterialButton(
             onPressed: () {
-              context.read<NoteDb>().updateNote(note.id, textController.text); // Update note in DB.
-              textController.clear(); // Clear the input field.
-              Navigator.pop(context); // Close the dialog.
+              if (textController.text.trim().isEmpty) {
+                // Prevent empty notes on update
+                ScaffoldMessenger.of(context).showSnackBar(
+                  const SnackBar(content: Text('Note cannot be empty')),
+                );
+                return;
+              }
+              // Update note in db
+              context.read<NoteDb>().updateNote(note.id, textController.text);
+              // Clear controller
+              textController.clear();
+              // Pop dialog box
+              Navigator.pop(context);
+
+              // Show success message
+              ScaffoldMessenger.of(context).showSnackBar(
+                const SnackBar(content: Text('Note updated successfully')),
+              );
             },
             child: const Text("Update"),
           ),
@@ -77,15 +116,58 @@ class _NotesPageState extends State<NotesPage> {
     );
   }
 
-  // Function to delete a note by ID.
+  // Show confirmation dialog before deleting a note
+  void deleteNoteWithConfirmation(int id) {
+    showDialog(
+      context: context,
+      builder: (context) => AlertDialog(
+        title: const Text("Delete Note"),
+        content: const Text("Are you sure you want to delete this note?"),
+        actions: [
+          // Cancel button
+          TextButton(
+            onPressed: () => Navigator.pop(context),
+            style: TextButton.styleFrom(
+              foregroundColor: Theme.of(context).colorScheme.inversePrimary, // Text color
+            ), // Cancel action
+            child: const Text("Cancel"),
+          ),
+          // Delete button
+          TextButton(
+            onPressed: () {
+              deleteNote(id); // Proceed with deletion
+              Navigator.pop(context);
+
+              // Show success message
+              ScaffoldMessenger.of(context).showSnackBar(
+                const SnackBar(content: Text('Note deleted successfully')),
+              );
+            },
+            style: TextButton.styleFrom(
+              foregroundColor: Theme.of(context).colorScheme.error, // Text color for delete
+            ),
+            child: const Text("Delete"),
+          ),
+        ],
+        backgroundColor: Theme.of(context)
+            .colorScheme
+            .surface, // Match background with theme
+      ),
+    );
+  }
+
+  // Delete a note
   void deleteNote(int id) {
-    context.read<NoteDb>().deleteNote(id); // Delete note from DB.
+    context.read<NoteDb>().deleteNote(id);
   }
 
   @override
   Widget build(BuildContext context) {
-    final noteDb = context.watch<NoteDb>(); // Watch for updates from NoteDb.
-    List<Note> currentNotes = noteDb.currentNotes; // List of current notes.
+    // Note db
+    final noteDb = context.watch<NoteDb>();
+
+    // Current notes
+    List<Note> currentNotes = noteDb.currentNotes;
 
     return Scaffold(
       appBar: AppBar(
@@ -95,18 +177,18 @@ class _NotesPageState extends State<NotesPage> {
       ),
       backgroundColor: Theme.of(context).colorScheme.surface,
       floatingActionButton: FloatingActionButton(
-        onPressed: createNote, // Open the dialog to create a new note.
+        onPressed: createNote,
         backgroundColor: Theme.of(context).colorScheme.primary,
         child: Icon(
           Icons.add,
           color: Theme.of(context).colorScheme.inversePrimary,
         ),
       ),
-      drawer: const MyDrawer(), // The app's navigation drawer.
+      drawer: const MyDrawer(),
       body: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
-          // Page heading.
+          // Heading
           Padding(
             padding: const EdgeInsets.only(left: 25.0),
             child: Text(
@@ -118,16 +200,19 @@ class _NotesPageState extends State<NotesPage> {
             ),
           ),
 
-          // Display a list of notes.
+          // List of notes
           Expanded(
             child: ListView.builder(
-              itemCount: currentNotes.length, // Number of notes.
+              itemCount: currentNotes.length,
               itemBuilder: (context, index) {
-                final note = currentNotes[index]; // Get individual note.
+                // Get individual note
+                final note = currentNotes[index];
+
+                // List tile UI
                 return NoteTile(
                   text: note.text,
-                  onEditPressed: () => updateNote(note), // Edit note.
-                  onDeletePressed: () => deleteNote(note.id), // Delete note.
+                  onEditPressed: () => updateNote(note),
+                  onDeletePressed: () => deleteNoteWithConfirmation(note.id),
                 );
               },
             ),
