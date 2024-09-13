@@ -8,10 +8,16 @@ A simple notes-taking app built with **Flutter**, utilizing the **Isar database*
   You can add, view, edit, and delete notes. The app saves your notes using the Isar database, providing fast and efficient storage.
 
 - **Dark/Light Mode Toggle**:
-  The app supports both light and dark themes, which are managed by the `ThemeProvider`. Users can toggle between modes in the settings page.
+  The app supports both light and dark themes, which are managed by the `ThemeProvider`. Users can toggle between modes in the settings page. The theme choice is persisted using `SharedPreferences`, ensuring the user's preference remains after the app is closed and reopened.
 
 - **Simple and Clean UI**:
   The UI is clean, using `Material` widgets, custom fonts (via Google Fonts), and a well-organized drawer for navigation.
+
+- **Confirmation for Deleting Notes**: 
+  A confirmation dialog is shown when attempting to delete a note, ensuring no accidental deletions.
+
+- **Theme-Consistent Buttons**:
+  Buttons like "Cancel" and "Delete" in dialogs are styled to follow the app’s current theme (light or dark), ensuring proper contrast and a unified look.
 
 ## Project Structure
 
@@ -83,16 +89,18 @@ This will generate the `note.g.dart` file for the `Note` model used by the Isar 
 - The app starts on the **Notes Page** where you can view a list of notes.
 - Tap the **+ button** (floating action button) to add a new note.
 - Tap the **3 dots** next to a note to update or delete it.
+- Deleting a note will show a confirmation dialog with **themed buttons** to ensure clarity in both light and dark modes.
 
 ### Settings Page
 - Open the **drawer** by tapping the top-left menu icon.
 - In the drawer, select **Settings** to toggle between light and dark themes.
+- **Theme Persistence**: The selected theme will now persist between app restarts using `SharedPreferences`.
 
 ## State Management
 
 The app uses the **Provider** package for state management, with two main providers:
 - **NoteDb Provider**: Manages CRUD operations for notes stored in the Isar database.
-- **ThemeProvider**: Manages the app's light and dark mode states.
+- **ThemeProvider**: Manages the app's light and dark mode states. The theme state is persisted using `SharedPreferences`.
 
 ### Key Classes
 
@@ -108,6 +116,7 @@ Here is a list of main dependencies:
 - **Isar**: High-performance, local database.
 - **Provider**: For managing app state.
 - **Google Fonts**: For custom fonts in the app.
+- **SharedPreferences**: To persist theme settings across app restarts.
 
 Make sure these dependencies are listed in your `pubspec.yaml`:
 
@@ -119,6 +128,7 @@ dependencies:
   isar: ^3.1.0+1
   path_provider: ^2.0.11
   google_fonts: ^3.0.1
+  shared_preferences: ^2.0.15 # For theme persistence
   build_runner: ^2.3.3 # Required for generating Isar schema
   isar_generator: ^3.1.0
 ```
@@ -129,10 +139,11 @@ dependencies:
 
 ## Future Enhancements
 
-In future updates, the following features could be implemented:
-- **Persist Theme Setting**: Save the dark mode preference even after the app restarts (this feature will be added in the next update).
+The following features could be implemented in future updates:
+
 - **Note Sorting**: Add functionality to sort notes by creation date or alphabetically.
 - **Note Search**: Allow users to search notes via a search bar.
+- **Enhanced UI Animations**: Add animations for creating, updating, and deleting notes to improve the user experience.
 
 ## Contributing
 
