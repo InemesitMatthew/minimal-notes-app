@@ -14,52 +14,42 @@ class NotesPage extends StatefulWidget {
 }
 
 class _NotesPageState extends State<NotesPage> {
-  // Text controller to access what the user typed
-  final textController = TextEditingController();
+  final textController = TextEditingController(); // Controller for handling user input
 
   @override
   void initState() {
     super.initState();
-    // On app startup, fetch existing notes
-    readNotes();
+    readNotes(); // Fetch notes when the app starts
   }
 
-  // Dispose controller to avoid memory leaks
   @override
   void dispose() {
-    textController.dispose();
+    textController.dispose(); // Clean up the controller to avoid memory leaks
     super.dispose();
   }
 
-  // Create a note
+  // Create a new note
   void createNote() {
     showDialog(
       context: context,
       builder: (context) => AlertDialog(
         backgroundColor: Theme.of(context).colorScheme.surface,
         content: TextField(
-          controller: textController,
+          controller: textController, // Input field for the new note text
           decoration: const InputDecoration(hintText: 'Enter note text'),
         ),
         actions: [
-          // Create button
           MaterialButton(
             onPressed: () {
               if (textController.text.trim().isEmpty) {
-                // Prevent empty notes and show an error message
                 ScaffoldMessenger.of(context).showSnackBar(
                   const SnackBar(content: Text('Note cannot be empty')),
                 );
                 return;
               }
-              // Add to db
-              context.read<NoteDb>().addNote(textController.text);
-              // Clear controller
-              textController.clear();
-              // Pop dialog box
-              Navigator.pop(context);
-
-              // Show success message
+              context.read<NoteDb>().addNote(textController.text); // Add the new note
+              textController.clear(); // Clear the input field
+              Navigator.pop(context); // Close the dialog
               ScaffoldMessenger.of(context).showSnackBar(
                 const SnackBar(content: Text('Note created successfully')),
               );
@@ -71,15 +61,14 @@ class _NotesPageState extends State<NotesPage> {
     );
   }
 
-  // Read notes
+  // Fetch notes from the database
   void readNotes() {
     context.read<NoteDb>().fetchNotes();
   }
 
-  // Update a note
+  // Update an existing note
   void updateNote(Note note) {
-    // Pre-fill the current note text
-    textController.text = note.text;
+    textController.text = note.text; // Pre-fill the current note text
     showDialog(
       context: context,
       builder: (context) => AlertDialog(
@@ -87,24 +76,17 @@ class _NotesPageState extends State<NotesPage> {
         title: const Text("Update Note"),
         content: TextField(controller: textController),
         actions: [
-          // Update button
           MaterialButton(
             onPressed: () {
               if (textController.text.trim().isEmpty) {
-                // Prevent empty notes on update
                 ScaffoldMessenger.of(context).showSnackBar(
                   const SnackBar(content: Text('Note cannot be empty')),
                 );
                 return;
               }
-              // Update note in db
-              context.read<NoteDb>().updateNote(note.id, textController.text);
-              // Clear controller
-              textController.clear();
-              // Pop dialog box
-              Navigator.pop(context);
-
-              // Show success message
+              context.read<NoteDb>().updateNote(note.id, textController.text); // Update the note
+              textController.clear(); // Clear the input field
+              Navigator.pop(context); // Close the dialog
               ScaffoldMessenger.of(context).showSnackBar(
                 const SnackBar(content: Text('Note updated successfully')),
               );
@@ -116,7 +98,7 @@ class _NotesPageState extends State<NotesPage> {
     );
   }
 
-  // Show confirmation dialog before deleting a note
+  // Delete a note with a confirmation dialog
   void deleteNoteWithConfirmation(int id) {
     showDialog(
       context: context,
@@ -124,56 +106,81 @@ class _NotesPageState extends State<NotesPage> {
         title: const Text("Delete Note"),
         content: const Text("Are you sure you want to delete this note?"),
         actions: [
-          // Cancel button
           TextButton(
             onPressed: () => Navigator.pop(context),
             style: TextButton.styleFrom(
-              foregroundColor: Theme.of(context).colorScheme.inversePrimary, // Text color
-            ), // Cancel action
+              foregroundColor: Theme.of(context).colorScheme.inversePrimary, // Style cancel button to match the theme
+            ),
             child: const Text("Cancel"),
           ),
-          // Delete button
           TextButton(
             onPressed: () {
-              deleteNote(id); // Proceed with deletion
-              Navigator.pop(context);
-
-              // Show success message
+              deleteNote(id); // Delete the note
+              Navigator.pop(context); // Close the dialog
               ScaffoldMessenger.of(context).showSnackBar(
                 const SnackBar(content: Text('Note deleted successfully')),
               );
             },
             style: TextButton.styleFrom(
-              foregroundColor: Theme.of(context).colorScheme.error, // Text color for delete
+              foregroundColor: Theme.of(context).colorScheme.error, // Style delete button as an error action
             ),
             child: const Text("Delete"),
           ),
         ],
-        backgroundColor: Theme.of(context)
-            .colorScheme
-            .surface, // Match background with theme
+        backgroundColor: Theme.of(context).colorScheme.surface,
       ),
     );
   }
 
-  // Delete a note
+  // Delete the note from the database
   void deleteNote(int id) {
     context.read<NoteDb>().deleteNote(id);
   }
 
   @override
   Widget build(BuildContext context) {
-    // Note db
-    final noteDb = context.watch<NoteDb>();
-
-    // Current notes
-    List<Note> currentNotes = noteDb.currentNotes;
+    final noteDb = context.watch<NoteDb>(); // Watch the NoteDb provider for changes
+    List<Note> currentNotes = noteDb.currentNotes; // Get the current list of notes
 
     return Scaffold(
       appBar: AppBar(
         elevation: 0,
         backgroundColor: Colors.transparent,
         foregroundColor: Theme.of(context).colorScheme.inversePrimary,
+        actions: [
+          // Dropdown to choose sorting order
+          DropdownButton<SortOrder>(
+            value: noteDb.currentSortOrder, // Current sort order
+            icon: Icon(Icons.sort, color: Theme.of(context).colorScheme.inversePrimary),
+            onChanged: (SortOrder? newSortOrder) {
+              if (newSortOrder != null) {
+                noteDb.currentSortOrder = newSortOrder; // Change the sorting order
+              }
+            },
+            items: [
+              // Sort by newest first
+              DropdownMenuItem(
+                value: SortOrder.newestFirst,
+                child: Text("Newest First", style: TextStyle(color: Theme.of(context).colorScheme.inversePrimary)),
+              ),
+              // Sort by oldest first
+              DropdownMenuItem(
+                value: SortOrder.oldestFirst,
+                child: Text("Oldest First", style: TextStyle(color: Theme.of(context).colorScheme.inversePrimary)),
+              ),
+              // Sort by A-Z
+              DropdownMenuItem(
+                value: SortOrder.alphabeticalAZ,
+                child: Text("A-Z", style: TextStyle(color: Theme.of(context).colorScheme.inversePrimary)),
+              ),
+              // Sort by Z-A
+              DropdownMenuItem(
+                value: SortOrder.alphabeticalZA,
+                child: Text("Z-A", style: TextStyle(color: Theme.of(context).colorScheme.inversePrimary)),
+              ),
+            ],
+          ),
+        ],
       ),
       backgroundColor: Theme.of(context).colorScheme.surface,
       floatingActionButton: FloatingActionButton(
@@ -188,7 +195,6 @@ class _NotesPageState extends State<NotesPage> {
       body: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
-          // Heading
           Padding(
             padding: const EdgeInsets.only(left: 25.0),
             child: Text(
@@ -199,20 +205,15 @@ class _NotesPageState extends State<NotesPage> {
               ),
             ),
           ),
-
-          // List of notes
           Expanded(
             child: ListView.builder(
-              itemCount: currentNotes.length,
+              itemCount: currentNotes.length, // Number of notes
               itemBuilder: (context, index) {
-                // Get individual note
-                final note = currentNotes[index];
-
-                // List tile UI
+                final note = currentNotes[index]; // Get individual note
                 return NoteTile(
                   text: note.text,
-                  onEditPressed: () => updateNote(note),
-                  onDeletePressed: () => deleteNoteWithConfirmation(note.id),
+                  onEditPressed: () => updateNote(note), // Edit note
+                  onDeletePressed: () => deleteNoteWithConfirmation(note.id), // Delete note with confirmation
                 );
               },
             ),
