@@ -1,10 +1,10 @@
 import 'package:flutter/material.dart';
 
 class CustomSearchBar extends StatelessWidget {
-  final bool isSearching; // Indicates if the search mode is active
-  final TextEditingController searchController; // Search text controller
-  final Function(String) onSearchChanged; // Callback when search query changes
-  final VoidCallback onSearchClose; // Callback to close search mode
+  final bool isSearching; // Indicates if search mode is active
+  final TextEditingController searchController; // Controller to capture search input
+  final Function(String) onSearchChanged; // Callback to handle changes in search input
+  final VoidCallback onSearchClose; // Callback to handle closing of search mode
 
   const CustomSearchBar({
     super.key,
@@ -16,21 +16,21 @@ class CustomSearchBar extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    // Return search bar when in search mode, otherwise just an empty widget (no text UI)
+    // If `isSearching` is true, display the search bar, else show an empty widget (avoiding any placeholder text).
     return isSearching
         ? TextField(
-            controller: searchController,
-            autofocus: true,
+            controller: searchController, // Text controller for the search bar
+            autofocus: true, // Automatically focus on the search input
             decoration: InputDecoration(
-              hintText: 'Search notes...', // Placeholder text
-              border: InputBorder.none,
+              hintText: 'Search notes...', // Placeholder text inside the search bar
+              border: InputBorder.none, // No border to maintain a clean UI
               hintStyle: TextStyle(
-                color: Theme.of(context).colorScheme.inversePrimary,
+                color: Theme.of(context).colorScheme.inversePrimary, // Hint text color matching the theme
               ),
             ),
-            style: TextStyle(color: Theme.of(context).colorScheme.inversePrimary),
-            onChanged: onSearchChanged, // Trigger on search input change
+            style: TextStyle(color: Theme.of(context).colorScheme.inversePrimary), // Input text color
+            onChanged: onSearchChanged, // Trigger callback when search input changes
           )
-        : const SizedBox(); // Empty widget instead of Text('') for cleaner UI
+        : const SizedBox.shrink(); // If not searching, return an empty widget to avoid UI clutter
   }
 }
