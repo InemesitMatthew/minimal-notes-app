@@ -13,22 +13,31 @@ A simple notes-taking app built with **Flutter**, utilizing the **Isar database*
 - **Simple and Clean UI**:
   The UI is clean, using `Material` widgets, custom fonts (via Google Fonts), and a well-organized drawer for navigation.
 
-- **Confirmation for Deleting Notes**: 
-  A confirmation dialog is shown when attempting to delete a note, ensuring no accidental deletions.
+- **Confirmation for Deleting, Creating, and Updating Notes**: 
+  Dialogs are shown when attempting to delete, create, or update a note, ensuring clarity and user control over their actions. **Themed buttons** are provided to align with the app’s current theme (light or dark).
+
+- **Note Search Functionality**:
+  A search bar has been added, allowing users to filter notes based on the content they type. The search bar can be toggled via a search icon in the AppBar.
+
+- **Note Sorting Options**:
+  Notes can be sorted by **Newest First**, **Oldest First**, or alphabetically (**A-Z**, **Z-A**). A sort button in the AppBar allows the user to select their preferred sorting order.
 
 - **Theme-Consistent Buttons**:
-  Buttons like "Cancel" and "Delete" in dialogs are styled to follow the app’s current theme (light or dark), ensuring proper contrast and a unified look.
+  Buttons like "Cancel," "Delete," "Create," and "Update" in dialogs are styled to follow the app’s current theme (light or dark), ensuring proper contrast and a unified look.
 
 ## Project Structure
 
 ```bash
 lib/
 │
-├── components/         # UI Components like Drawer and Note Tiles
+├── components/         # UI Components like Drawer, Note Tiles, Dialogs, and Search
 │   ├── drawer.dart
 │   ├── drawer_tile.dart
 │   ├── note_tile.dart
-│   └── note_settings.dart
+│   ├── note_settings.dart
+│   ├── note_dialogs.dart  # Modularized create, update, delete dialogs
+│   ├── search_widget.dart # Custom search bar widget
+│   └── sort_menu.dart     # Sort menu widget
 │
 ├── models/             # Data models and database handlers
 │   ├── note.dart       # Note model (for Isar)
@@ -89,22 +98,24 @@ This will generate the `note.g.dart` file for the `Note` model used by the Isar 
 - The app starts on the **Notes Page** where you can view a list of notes.
 - Tap the **+ button** (floating action button) to add a new note.
 - Tap the **3 dots** next to a note to update or delete it.
-- Deleting a note will show a confirmation dialog with **themed buttons** to ensure clarity in both light and dark modes.
+- **Deleting a note** will show a confirmation dialog with **themed buttons** to ensure clarity in both light and dark modes.
+- **Searching notes**: Tap the **search icon** in the AppBar to display a search bar, allowing users to filter notes based on the text they enter.
+- **Sorting notes**: Tap the **sort icon** to choose how notes should be displayed (Newest First, Oldest First, A-Z, Z-A).
 
 ### Settings Page
 - Open the **drawer** by tapping the top-left menu icon.
 - In the drawer, select **Settings** to toggle between light and dark themes.
-- **Theme Persistence**: The selected theme will now persist between app restarts using `SharedPreferences`.
+- **Theme Persistence**: The selected theme will persist between app restarts using `SharedPreferences`.
 
 ## State Management
 
 The app uses the **Provider** package for state management, with two main providers:
-- **NoteDb Provider**: Manages CRUD operations for notes stored in the Isar database.
+- **NoteDb Provider**: Manages CRUD operations for notes stored in the Isar database, as well as the sorting logic.
 - **ThemeProvider**: Manages the app's light and dark mode states. The theme state is persisted using `SharedPreferences`.
 
 ### Key Classes
 
-- **NoteDb**: Handles all database interactions using the Isar database.
+- **NoteDb**: Handles all database interactions using the Isar database. It also manages the current sort order and fetches notes accordingly.
 - **Note**: Model class representing a single note. Automatically generates an ID and stores the note text.
 - **ThemeProvider**: Manages the theme data and handles the toggle between light and dark mode.
 
@@ -117,6 +128,8 @@ Here is a list of main dependencies:
 - **Provider**: For managing app state.
 - **Google Fonts**: For custom fonts in the app.
 - **SharedPreferences**: To persist theme settings across app restarts.
+- **Path Provider**: To manage local file paths for the Isar database.
+- **Popover**: To display popover menus for note actions (edit/delete).
 
 Make sure these dependencies are listed in your `pubspec.yaml`:
 
@@ -131,6 +144,7 @@ dependencies:
   shared_preferences: ^2.0.15 # For theme persistence
   build_runner: ^2.3.3 # Required for generating Isar schema
   isar_generator: ^3.1.0
+  popover: ^0.2.3 # For popover menu in note actions
 ```
 
 ## Screenshots
@@ -141,9 +155,8 @@ dependencies:
 
 The following features could be implemented in future updates:
 
-- **Note Sorting**: Add functionality to sort notes by creation date or alphabetically.
-- **Note Search**: Allow users to search notes via a search bar.
-- **Enhanced UI Animations**: Add animations for creating, updating, and deleting notes to improve the user experience.
+- **Enhanced UI Animations**: Adding animations for creating, updating, and deleting notes for improved user experience.
+- **Persist Sort Preference**: Store the user’s sort preference and apply it when the app is restarted.
 
 ## Contributing
 
