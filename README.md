@@ -149,7 +149,7 @@ dependencies:
 
 ## Screenshots
 
-> _Screenshots coming soon!_
+> _You can Find them in assets/screenshots!_
 
 ## Future Enhancements
 
